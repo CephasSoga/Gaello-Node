@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es2022",
+    "module": "esnext", // Use esnext for ES module support
+    "lib": ["esnext", "dom"],
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": [
+    "**/*.ts",
+    ".env",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

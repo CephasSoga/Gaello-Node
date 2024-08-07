@@ -1,0 +1,25 @@
+{
+  "name": "gaello-node",
+  "version": "1.0.0",
+  "description": "A core component of the Gaello X project which has been split to allow modular and flexible control. This componets collects financial data from various APIs and push them to neo4j and mongo databases.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm start",
+    "build": "npx tsc",
+    "start": "node dist/src/index.js"
+  },
+  "author": "Cephas from Cube",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.8.0",
+    "winston": "^3.13.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.5",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.4"
+  }
+}
