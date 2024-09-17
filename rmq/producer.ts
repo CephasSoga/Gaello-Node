@@ -107,7 +107,7 @@ class Producer {
      * @throws {Error} If there is an error connecting to RabbitMQ.
      * @throws {Error} If there is an error producing a message to RabbitMQ.
      */
-    async produce(messages: Message[]): Promise<void> {
+    async produce_(messages: Message[]): Promise<void> {
         const connection = await this.connect();
         try {
             for (const message of messages) {
@@ -118,6 +118,10 @@ class Producer {
         } finally {
             await this.close(connection!);
         }
+    }
+
+    async produce(messages: Message[]): Promise<void> {
+        log("info", "Producer > Produce: Skipping message production as it is no more required.");
     }
 }
 

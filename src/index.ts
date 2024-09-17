@@ -14,6 +14,9 @@ import CryptoAsSource from "../news/sources/news/crypto";
 import ForexAsSource from "../news/sources/news/forex";
 import StockRSS from "../news/sources/RSS Feeds/stock";
 
+import env from "../env";
+import { deleteOldDocuments } from "../utils/mongo";
+
 /**
  * Fetches news data by creating instances of various news sources and calling their build methods.
  *
@@ -96,6 +99,24 @@ const batchProcess = async (promises: (() => Promise<void>)[], batchSize: number
 };
 
 /**
+ * Cleans up old documents from the MongoDB database.
+ *
+ * This function is used to periodically remove old documents from the collections taht do not implement the upsert logic.
+ * Those need manual clean up.
+ * This function can be used to clean up documents from other collections as well, by adding them to the
+ * for-of loop.
+ *
+ * @returns {Promise<void>} - A promise that resolves when all documents have been deleted.
+ */
+async function cleanUp(): Promise<void> {
+    for (const collection of ['articles', 'marketSummary']) { // eventually more collections here
+        log("info", `Cleaning up ${collection}...`);
+        await deleteOldDocuments(env.MONGO_URI, env.MONGO_DB, collection, 'date', 30); // delete old documents from 'articles' collection
+        log("info", `Cleaned up ${collection}.`);
+    }
+}
+
+/**
  * Asynchronously executes the main function.
  * 
  * This function fetches market data and news data, and then processes them in batches.
@@ -110,9 +131,10 @@ async function main() {
 
     await batchProcess(allPromises, 2); // Adjust batch size as needed
 
+    await cleanUp();
+
     log("info", "Successfully collected and built financial data.");
 }
-
 
 
 main()

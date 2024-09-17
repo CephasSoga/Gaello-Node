@@ -1,15 +1,17 @@
 import env from "../../env";
 import { Commodity, collectCommoditySymbols } from "./symbols";
 import CommodityItem, { HistoricalData } from "./commodity";
-import { mongoMultipleInsertion } from "../../utils/mongo";
+import { mongoMultipleUpsert } from "../../utils/mongo";
 import producer, { Message } from "../../rmq/producer";
 import log from "../../utils/logging";
+import { str } from "../../utils/common";
 
 type commodityDocument = {
     symbol: string;
     name: string;
     date: Date;
     historical: HistoricalData;
+    contentStr: string;
 };
 
 
@@ -54,6 +56,7 @@ class Commodities {
                         name: commodity.name,
                         date: new Date(),
                         historical: historical,
+                        contentStr: str(historical)
                     };
 
                     // Push to array of documents
@@ -81,7 +84,7 @@ class Commodities {
                 // Log the documents before inserting
                 log("info", `Trader > Commodity:: Inserting ${this.commodityDocuments.length} commodity documents.`);
                 try {                 
-                    await mongoMultipleInsertion(this.commodityDocuments, env.MONGO_URI, env.MONGO_DB, "commodities");
+                    await mongoMultipleUpsert(this.commodityDocuments, env.MONGO_URI, env.MONGO_DB, "commodities");
                     await producer.produce(this.commodityMessages);
                 } catch (error) {
                     log("error", 'Trader > Commodity:: Error inserting documents or producing messages:', error);

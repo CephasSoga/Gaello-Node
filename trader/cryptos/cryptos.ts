@@ -1,15 +1,18 @@
 import env from "../../env";
 import CryptoItem, { CryptoInterface } from "./crypto";
 import {Crypto, collectCryptos } from "./symbols";
-import { mongoMultipleInsertion } from "../../utils/mongo";
+import { mongoMultipleUpsert } from "../../utils/mongo";
 import producer, { Message } from "../../rmq/producer";
 import log from "../../utils/logging";
+import { str } from "../../utils/common";
+import HistoricalData from "../stocks/historical";
 
 type cryptoDocument = {
   symbol: string;
   name: string;
   date: Date;
   historicalData: CryptoInterface;
+  contentStr: string;
 }
 
 class Cryptos {
@@ -53,6 +56,7 @@ class Cryptos {
             name: crypto.name,
             date: new Date(),
             historicalData: cryptoResult,
+            contentStr: str(cryptoResult)
           };
           
           // Push to array of documents
@@ -80,7 +84,7 @@ class Cryptos {
         // Log the documents before inserting
         log("info", `Trader > Crypto::Inserting ${this.cryptoDocuments.length} crypto documents.`);
         try {
-            await mongoMultipleInsertion(this.cryptoDocuments, env.MONGO_URI, env.MONGO_DB, "crypto");
+            await mongoMultipleUpsert(this.cryptoDocuments, env.MONGO_URI, env.MONGO_DB, "crypto");
             await producer.produce(this.cryptoMessages);
         } catch (error) {
             log("error", 'Trader > Crypto:: Error inserting documents or producing messages:', error);

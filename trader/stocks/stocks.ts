@@ -1,15 +1,17 @@
 import env from "../../env";
 import Ticker, { TickerInterface } from "./ticker";
 import {Stock, collectSymbols } from "./symbols";
-import { mongoMultipleInsertion } from "../../utils/mongo";
+import { mongoMultipleUpsert } from "../../utils/mongo";
 import producer, { Message } from "../../rmq/producer";
 import log from "../../utils/logging";
+import { str } from "../../utils/common";
 
 interface tickerDocument {
   symbol: string,
   name:string,
   date: Date,
   ticker: TickerInterface,
+  contentStr: string;
 }
 
 class Stocks {
@@ -54,6 +56,7 @@ class Stocks {
             name: stock.name,
             date: new Date(),
             ticker: tickerResult,
+            contentStr: str(tickerResult),
           };
 
           this.tickerDocuments.push(doc);
@@ -80,7 +83,7 @@ class Stocks {
         // Log the documents before inserting
         log("info", `Trader > Stocks:: Inserting ${this.tickerDocuments.length} stock documents.`);
         try {
-            await mongoMultipleInsertion(this.tickerDocuments, env.MONGO_URI, env.MONGO_DB, "ticker");
+            await mongoMultipleUpsert(this.tickerDocuments, env.MONGO_URI, env.MONGO_DB, "ticker");
             await producer.produce(this.tickerMessages);
         } catch (error) {
             log("error", 'Trader > Stocks:: Error inserting documents or producing messages:', error);

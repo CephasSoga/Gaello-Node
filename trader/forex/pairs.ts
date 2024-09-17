@@ -1,15 +1,17 @@
 import env from "../../env";
 import { ForexCurrencyPair,collectForexCurrencyPairs } from "./symbols";
 import ForexItem, { ForexPrice} from "./pair";
-import { mongoMultipleInsertion } from "../../utils/mongo";
+import { mongoMultipleUpsert } from "../../utils/mongo";
 import producer, { Message } from "../../rmq/producer";
 import log from "../../utils/logging";
+import { str } from "../../utils/common";
 
 type forexDocument = {
     symbol: string;
     name: string;
     date: Date;
     price: ForexPrice;
+    contentStr: string;
 };
 
 class Forex {
@@ -47,6 +49,7 @@ class Forex {
                         name: pair.name,
                         date: new Date(),
                         price: price,
+                        contentStr: str(price)
                     };
 
                     // Push to array of documents
@@ -74,7 +77,7 @@ class Forex {
                 // Log the documents before inserting
                 log("info", `Trader > Forex:: Inserting ${this.forexDocuments.length} forex documents.`);
                 try {                 
-                    await mongoMultipleInsertion(this.forexDocuments, env.MONGO_URI, env.MONGO_DB, "forex");
+                    await mongoMultipleUpsert(this.forexDocuments, env.MONGO_URI, env.MONGO_DB, "forex");
                     await producer.produce(this.forexMessages);
                 } catch (error) {
                     log("error", 'Trader > Forex:: Error inserting documents or producing messages:', error);

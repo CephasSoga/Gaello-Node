@@ -1,10 +1,11 @@
 import IndexItem, {HistoricalQuote}  from "./index";
 import exportables from "./symbols";
-import {mongoMultipleInsertion} from "../../utils/mongo";
+import {mongoMultipleUpsert} from "../../utils/mongo";
 import log from "../../utils/logging";
 import producer, { Message } from "../../rmq/producer";
 import {IndexType} from "./symbols";
 import env from "../../env";
+import { str } from "../../utils/common";
 
 
 type indexDocument = {
@@ -12,6 +13,7 @@ type indexDocument = {
     name: string;
     date: Date;
     historical: HistoricalQuote;
+    contentStr: string;
 };
 
 class Index {
@@ -51,6 +53,7 @@ class Index {
                         name: pair.name,
                         date: new Date(),
                         historical: historical,
+                        contentStr: str(historical),
                     };
 
                     // Push to array of documents
@@ -78,7 +81,7 @@ class Index {
                 log("info", `Trader > Index:: Inserting ${this.indexDocuments.length} documents`);
                 // Insert documents
                 try {
-                    await mongoMultipleInsertion(this.indexDocuments, env.MONGO_URI, env.MONGO_DB, "indices");
+                    await mongoMultipleUpsert(this.indexDocuments, env.MONGO_URI, env.MONGO_DB, "indices");
                     await producer.produce(this.indexMessages);
                 } catch (error) {
                     log("error", 'Trader > Index:: Error inserting documents or producing messages:', error);

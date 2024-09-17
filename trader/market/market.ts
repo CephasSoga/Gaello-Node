@@ -5,7 +5,7 @@ import { now } from "../../utils/time";
 import { mongoSingleInsertion } from "../../utils/mongo";
 import env from "../../env";
 import log from "../../utils/logging";
-
+import { str } from "../../utils/common";
 export interface MarketInterface{
     performances: MarketPerformance,
     socialSentiments: MarketSentiments
@@ -14,6 +14,7 @@ export interface MarketInterface{
 interface MarketDocument {
     date: Date,
     content: MarketInterface,
+    contentStr: string;
 }
 class Market {
     constructor() {}
@@ -45,6 +46,7 @@ class Market {
         const doc: MarketDocument = {
             date: new Date(),
             content: result,
+            contentStr: str(result),
         }
         
         log("info", "Trader > Market:: Pushing market data to queue and database")

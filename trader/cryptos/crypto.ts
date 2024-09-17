@@ -33,16 +33,27 @@ export class CryptoItem extends BuildComponents {
 
     async build(): Promise<{ cryptoResult: CryptoInterface, message: Message }> {
         const [quote, daily] = await Promise.all([this.quote(), this.daily()]);
+        
+        const arrayEndAt: number = 360
 
         let dailySlice = daily;
 
         if (Array.isArray(daily)){  
-            dailySlice = daily.slice(0, 100);
+            dailySlice = daily.slice(0, arrayEndAt);
+        }
+
+        if (typeof daily === 'object' &&
+            daily !== null &&
+            Array.isArray(daily.historical)) {
+            dailySlice = daily.historical.slice(0, arrayEndAt);
         }
 
         const result: CryptoInterface = {
             quote: quote,
-            daily: dailySlice,
+            daily: {
+                symbol: daily.symbol || this.symbol,
+                historical: dailySlice
+            },
         };
 
         const message: Message = {

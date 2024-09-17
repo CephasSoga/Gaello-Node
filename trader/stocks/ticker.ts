@@ -69,7 +69,13 @@ class Ticker {
     constructor(public symbol: any) {}
     
     public async build(): Promise<{tickerResult: TickerInterface, message: Message}> {
-        const [general, analysis, valuation, historical, upsAndDowns, revenues, statistics] = await Promise.all(
+        const [
+            general, 
+            analysis, 
+            valuation, 
+            historical, upsAndDowns, revenues, statistics
+
+        ] = await Promise.all(
             [
                 new GenericInformation(this.symbol).run(),
                 new FinancialAnalysis(this.symbol).run(),
